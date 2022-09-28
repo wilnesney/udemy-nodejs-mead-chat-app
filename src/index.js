@@ -11,17 +11,15 @@ const io = socketio(server);
 const publicDirectoryPath = path.join(__dirname, '../public');
 app.use(express.static(publicDirectoryPath));
 
-let count = 0;
+
 
 io.on('connect', (socket) => {
     console.log('New WebSocket connection');
 
-    socket.emit('countUpdated', count);
-    
-    socket.on('increment', () => {
-        ++count;
-        //socket.emit('countUpdate', count);  // Send to the current connection
-        io.emit('countUpdated', count); // Send to all current connections
+    socket.emit('message', 'Welcome!');
+
+    socket.on('sendMessage', (sentMessage) => {
+        io.emit('message', sentMessage);
     })
 })
 

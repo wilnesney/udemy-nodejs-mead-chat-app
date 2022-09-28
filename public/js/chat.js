@@ -1,10 +1,15 @@
 const socket = io();   // Connects to socket.io server
 
-socket.on('countUpdated', (count) => {
-    console.log('Count updated:', count);
+socket.on('message', (message) => {
+    console.log(message);
 })
 
-const incrementButton = document.querySelector('#increment');
-incrementButton.addEventListener('click', () => {
-    socket.emit('increment');
+const messageForm = document.querySelector('#message-form');
+const messageInput = document.querySelector('#message-input');
+messageForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const newText = event.target.elements.message.value.trim();
+    if (newText) {
+        socket.emit('sendMessage', newText);
+    }
 })
