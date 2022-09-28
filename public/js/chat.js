@@ -1,0 +1,1 @@
+io();   // Connects to socket.io server
