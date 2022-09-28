@@ -17,9 +17,14 @@ io.on('connect', (socket) => {
     console.log('New WebSocket connection');
 
     socket.emit('message', 'Welcome!');
+    socket.broadcast.emit('message', 'A new user joined!');
 
     socket.on('sendMessage', (sentMessage) => {
         io.emit('message', sentMessage);
+    })
+
+    socket.on('disconnect', () => {
+        io.emit('message', 'A user left!');
     })
 })
 
