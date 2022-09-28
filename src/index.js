@@ -3,6 +3,7 @@ const path = require('path');
 const Filter = require('bad-words');
 const express = require('express');
 const socketio = require('socket.io');
+const { generateMessage } = require('./utils/messages');
 
 const app = express();
 const server = http.createServer(app); // Express usually does this behind the scenes,
@@ -16,8 +17,8 @@ app.use(express.static(publicDirectoryPath));
 io.on('connect', (socket) => {
     console.log('New WebSocket connection');
 
-    socket.emit('message', 'Welcome!');
-    socket.broadcast.emit('message', 'A new user joined!');
+    socket.emit('message', generateMessage('Welcome!'));
+    socket.broadcast.emit('message', generateMessage('A new user joined!'));
 
     // The callback is optional--calling it tells to the client that
     // the server received and processed what the client sent, 
@@ -28,19 +29,19 @@ io.on('connect', (socket) => {
             return callback('Profanity is not allowed!');
         }
 
-        io.emit('message', sentMessage);
+        io.emit('message', generateMessage(sentMessage));
 
         callback(); // Acknowledgement callback (so client knows we got it)
     })
 
     socket.on('sendLocation', (coords, callback) => {
-        io.emit('message', `https://google.com/maps?q=${coords.latitude},${coords.longitude}`);
+        io.emit('locationMessage', `https://google.com/maps?q=${coords.latitude},${coords.longitude}`);
 
         callback(); // Acknowledge
     })
 
     socket.on('disconnect', () => {
-        io.emit('message', 'A user left!');
+        io.emit('message', generateMessage('A user left!'));
     })
 })
 

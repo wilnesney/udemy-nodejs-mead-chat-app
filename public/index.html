@@ -17,12 +17,21 @@
         <script id="message-template" type="text/html">
             <div>
                 <!-- Dynamically replaced by 'message' data passed with Mustache -->
-                <p>{{message}}</p>  
+                <p>{{createdAt}} - {{message}}</p>  
+            </div>
+        </script>
+
+        <script id="location-message-template" type="text/html">
+            <div>
+                <p>
+                    <a href="{{url}}" target="_blank">My current location</a>
+                </p>
             </div>
         </script>
 
         <!-- Mustache library used for templating -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.min.js"></script>
+        <!-- Moment library used for formatting times (though it can do a lot more w/ time)-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.6.0/qs.min.js"></script>
         <!-- Provided by socket.io; not a real file on server filesystem -->
