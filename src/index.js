@@ -1,6 +1,7 @@
-const express = require('express');
 const http = require('http');
 const path = require('path');
+const Filter = require('bad-words');
+const express = require('express');
 const socketio = require('socket.io');
 
 const app = express();
@@ -12,19 +13,30 @@ const publicDirectoryPath = path.join(__dirname, '../public');
 app.use(express.static(publicDirectoryPath));
 
 
-
 io.on('connect', (socket) => {
     console.log('New WebSocket connection');
 
     socket.emit('message', 'Welcome!');
     socket.broadcast.emit('message', 'A new user joined!');
 
-    socket.on('sendMessage', (sentMessage) => {
+    // The callback is optional--calling it tells to the client that
+    // the server received and processed what the client sent, 
+    // possibly with other information.
+    socket.on('sendMessage', (sentMessage, callback) => {
+        const filter = new Filter();
+        if (filter.isProfane(sentMessage)) {
+            return callback('Profanity is not allowed!');
+        }
+
         io.emit('message', sentMessage);
+
+        callback(); // Acknowledgement callback (so client knows we got it)
     })
 
-    socket.on('sendLocation', (coords) => {
+    socket.on('sendLocation', (coords, callback) => {
         io.emit('message', `https://google.com/maps?q=${coords.latitude},${coords.longitude}`);
+
+        callback(); // Acknowledge
     })
 
     socket.on('disconnect', () => {

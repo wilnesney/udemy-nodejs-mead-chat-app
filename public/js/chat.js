@@ -10,7 +10,12 @@ messageForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const newText = event.target.elements.message.value.trim();
     if (newText) {
-        socket.emit('sendMessage', newText);
+        socket.emit('sendMessage', newText, (error) => {
+            if (error) {
+                return console.log(error);
+            }
+            console.log('The message was delivered!');
+        });
     }
 })
 
@@ -23,6 +28,8 @@ sendLocationButton.addEventListener('click', () => {
         socket.emit('sendLocation', {
             latitude: position.coords.latitude, 
             longitude: position.coords.longitude
+        }, () => {
+            console.log('Location shared!');
         });
     })
 })

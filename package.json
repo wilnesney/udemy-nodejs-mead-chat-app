@@ -17,6 +17,7 @@
     "nodemon": "^2.0.20"
   },
   "dependencies": {
+    "bad-words": "^3.0.4",
     "express": "^4.18.1",
     "socket.io": "^4.5.2",
     "supertest": "^6.2.4"
