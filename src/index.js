@@ -3,7 +3,7 @@ const path = require('path');
 const Filter = require('bad-words');
 const express = require('express');
 const socketio = require('socket.io');
-const { generateMessage } = require('./utils/messages');
+const { generateMessage, generateLocationMessage } = require('./utils/messages');
 
 const app = express();
 const server = http.createServer(app); // Express usually does this behind the scenes,
@@ -35,7 +35,8 @@ io.on('connect', (socket) => {
     })
 
     socket.on('sendLocation', (coords, callback) => {
-        io.emit('locationMessage', `https://google.com/maps?q=${coords.latitude},${coords.longitude}`);
+        io.emit('locationMessage', 
+                generateLocationMessage(`https://google.com/maps?q=${coords.latitude},${coords.longitude}`));
 
         callback(); // Acknowledge
     })
