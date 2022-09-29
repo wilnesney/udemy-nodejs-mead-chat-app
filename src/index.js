@@ -27,14 +27,14 @@ io.on('connect', (socket) => {
 
         socket.join(user.room);
 
-        socket.emit('message', generateMessage('Welcome!'));
+        socket.emit('message', generateMessage('Admin', 'Welcome!'));
         socket.broadcast.to(user.room)
-            .emit('message', generateMessage(`${user.username} joined!`));
+            .emit('message', generateMessage('Admin', `${user.username} joined!`));
 
         callback();
     })
 
-    // The callback is optional--calling it tells to the client that
+    // Callbacks are optional (but must be used if passed)--calling it tells to the client that
     // the server received and processed what the client sent, 
     // possibly with other information.
     socket.on('sendMessage', (sentMessage, callback) => {
@@ -43,14 +43,20 @@ io.on('connect', (socket) => {
             return callback('Profanity is not allowed!');
         }
 
-        io.emit('message', generateMessage(sentMessage));
+        const user = getUser(socket.id);
+        if (user) {
+            io.to(user.room).emit('message', generateMessage(user.username, sentMessage));
+        }
 
         callback(); // Acknowledgement callback (so client knows we got it)
     })
 
     socket.on('sendLocation', (coords, callback) => {
-        io.emit('locationMessage', 
-                generateLocationMessage(`https://google.com/maps?q=${coords.latitude},${coords.longitude}`));
+        const user = getUser(socket.id);
+        if (user) {
+            io.to(user.room).emit('locationMessage', 
+                generateLocationMessage(user.username, coords));
+        }
 
         callback(); // Acknowledge
     })
@@ -59,7 +65,7 @@ io.on('connect', (socket) => {
         const user = removeUser(socket.id);
         // User might not be present if they never joined a room (due to bad args, etc.)
         if (user) {
-            io.to(user.room).emit('message', generateMessage(`${user.username} left!`));
+            io.to(user.room).emit('message', generateMessage('Admin', `${user.username} left!`));
         }        
     })
 })
