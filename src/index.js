@@ -4,6 +4,7 @@ const Filter = require('bad-words');
 const express = require('express');
 const socketio = require('socket.io');
 const { generateMessage, generateLocationMessage } = require('./utils/messages');
+const { addUser, removeUser, getUser, getUsersInRoom } = require('./utils/users');
 
 const app = express();
 const server = http.createServer(app); // Express usually does this behind the scenes,
@@ -17,13 +18,20 @@ app.use(express.static(publicDirectoryPath));
 io.on('connect', (socket) => {
     console.log('New WebSocket connection');
 
-    
+    socket.on('join', ({ username, room }, callback) => {
+        const { error, user } = addUser({ id: socket.id, username, room });
 
-    socket.on('join', ({ username, room }) => {
-        socket.join(room);
+        if (error) {
+            return callback(error);
+        }
+
+        socket.join(user.room);
 
         socket.emit('message', generateMessage('Welcome!'));
-        socket.broadcast.to(room).emit('message', generateMessage(`${username} joined!`));
+        socket.broadcast.to(user.room)
+            .emit('message', generateMessage(`${user.username} joined!`));
+
+        callback();
     })
 
     // The callback is optional--calling it tells to the client that
@@ -48,7 +56,11 @@ io.on('connect', (socket) => {
     })
 
     socket.on('disconnect', () => {
-        io.emit('message', generateMessage('A user left!'));
+        const user = removeUser(socket.id);
+        // User might not be present if they never joined a room (due to bad args, etc.)
+        if (user) {
+            io.to(user.room).emit('message', generateMessage(`${user.username} left!`));
+        }        
     })
 })
 
