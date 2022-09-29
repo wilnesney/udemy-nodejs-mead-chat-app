@@ -6,12 +6,14 @@ const $messageFormInput = $messageForm.querySelector('input');
 const $messageFormButton = $messageForm.querySelector('button');
 const $sendLocationButton = document.querySelector('#send-location');
 const $messages = document.querySelector('#messages');
+const $sidebar = document.querySelector('#sidebar');
 
 // Templates
 const messageTemplate = document.querySelector('#message-template').innerHTML;
 const locationMessageTemplate = document.querySelector('#location-message-template').innerHTML;
+const sidebarTemplate = document.querySelector('#sidebar-template').innerHTML;
 
-//
+// Options
 // Without ignoreQueryPrefix, we get the query string question mark on one of our variable names
 const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true });
 
@@ -31,6 +33,14 @@ socket.on('locationMessage', (locationMessage) => {
         createdAt: moment(locationMessage.createdAt).format('h:mm a'),
     });
     $messages.insertAdjacentHTML('beforeend', renderedHtml);
+})
+
+socket.on('roomData', ({ room, users }) => {
+    const renderedHtml = Mustache.render(sidebarTemplate, {
+        room,
+        users,
+    });
+    $sidebar.innerHTML = renderedHtml;
 })
 
 $messageForm.addEventListener('submit', (event) => {
