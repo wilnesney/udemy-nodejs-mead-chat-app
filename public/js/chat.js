@@ -11,6 +11,10 @@ const $messages = document.querySelector('#messages');
 const messageTemplate = document.querySelector('#message-template').innerHTML;
 const locationMessageTemplate = document.querySelector('#location-message-template').innerHTML;
 
+//
+// Without ignoreQueryPrefix, we get the query string question mark on one of our variable names
+const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true });
+
 socket.on('message', (message) => {
     const renderedHtml = Mustache.render(messageTemplate, {
         message: message.text,
@@ -68,3 +72,5 @@ $sendLocationButton.addEventListener('click', () => {
         });
     })
 })
+
+socket.emit('join', { username, room });

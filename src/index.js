@@ -17,8 +17,14 @@ app.use(express.static(publicDirectoryPath));
 io.on('connect', (socket) => {
     console.log('New WebSocket connection');
 
-    socket.emit('message', generateMessage('Welcome!'));
-    socket.broadcast.emit('message', generateMessage('A new user joined!'));
+    
+
+    socket.on('join', ({ username, room }) => {
+        socket.join(room);
+
+        socket.emit('message', generateMessage('Welcome!'));
+        socket.broadcast.to(room).emit('message', generateMessage(`${username} joined!`));
+    })
 
     // The callback is optional--calling it tells to the client that
     // the server received and processed what the client sent, 
