@@ -17,6 +17,42 @@ const sidebarTemplate = document.querySelector('#sidebar-template').innerHTML;
 // Without ignoreQueryPrefix, we get the query string question mark on one of our variable names
 const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true });
 
+// Autoscrolls down to newest message *if* the user hasn't scrolled up
+// to look at older messages.
+const autoscroll = () => {
+    // Get latest message
+    const $newMessage = $messages.lastElementChild;
+
+    // Height of the new message
+    const newMessageStyles = getComputedStyle($newMessage);
+    const newMessageMargin = parseInt(newMessageStyles.marginBottom);
+    const newMessageHeight = $newMessage.offsetHeight + newMessageMargin;
+
+    // Visible height of messages area
+    const visibleHeight = $messages.offsetHeight;
+
+    // Actual height of messages container
+    const containerHeight = $messages.scrollHeight;
+
+    // scrollTop is distance scrolled (0 for no scrolling).
+    // scrollTop + the visible height gives us the total distance from
+    // the top of messages to the bottom of where the user can see.
+    const scrollOffset = $messages.scrollTop + visibleHeight;
+
+    /*  When a new message comes in, nothing automatically scrolls it.
+        So, by default (assuming we're at the last message), 
+        we should currently be scrolled to just before the new message.
+        I.e., scrollOffset should be (containerHeight - newMessageHeight)
+        if there are a bunch of messages. 
+        If scrollOffset is less than that, it means the user scrolled up
+        and is viewing messages, so we *don't* want to annoy them by scrolling
+        things down.
+    */
+    if ((containerHeight - newMessageHeight) <= scrollOffset) {
+        $messages.scrollTop = $messages.scrollHeight;
+    }
+}
+
 socket.on('message', (message) => {
     const renderedHtml = Mustache.render(messageTemplate, {
         username: message.username,
@@ -24,6 +60,7 @@ socket.on('message', (message) => {
         createdAt: moment(message.createdAt).format('h:mm a'), // Moment formats the timestamp number
     });
     $messages.insertAdjacentHTML('beforeend', renderedHtml);
+    autoscroll();
 })
 
 socket.on('locationMessage', (locationMessage) => {
@@ -33,6 +70,7 @@ socket.on('locationMessage', (locationMessage) => {
         createdAt: moment(locationMessage.createdAt).format('h:mm a'),
     });
     $messages.insertAdjacentHTML('beforeend', renderedHtml);
+    autoscroll();
 })
 
 socket.on('roomData', ({ room, users }) => {
