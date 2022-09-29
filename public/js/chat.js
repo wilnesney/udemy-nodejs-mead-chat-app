@@ -29,11 +29,11 @@ socket.on('locationMessage', (locationMessage) => {
 
 $messageForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    // Disable form submission while waiting for response
-    $messageFormButton.setAttribute('disabled', 'disabled');
 
     const newText = event.target.elements.message.value.trim();
     if (newText) {
+        // Disable form submission while waiting for response
+        $messageFormButton.setAttribute('disabled', 'disabled');
         socket.emit('sendMessage', newText, (error) => {
             // Got response from server, so re-enable form
             $messageFormButton.removeAttribute('disabled');
